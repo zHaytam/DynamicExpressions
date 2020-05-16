@@ -5,7 +5,9 @@
         Equals,
         DoesntEqual,
         GreaterThan,
+        GreaterThanOrEqual,
         LessThan,
+        LessThanOrEqual,
         Contains,
         StartsWith,
         EndsWith

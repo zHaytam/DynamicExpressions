@@ -50,6 +50,8 @@ namespace DynamicExpressions
                 FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, constant),
                 FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, constant),
                 FilterOperator.DoesntEqual => Expression.NotEqual(prop, constant),
+                FilterOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(prop, constant),
+                FilterOperator.LessThanOrEqual => Expression.LessThanOrEqual(prop, constant),
                 _ => throw new NotImplementedException(),
             };
         }
