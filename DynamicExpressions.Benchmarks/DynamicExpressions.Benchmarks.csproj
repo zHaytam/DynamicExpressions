@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DynamicFiltersAndSorts\DynamicExpressions.csproj" />
   </ItemGroup>
 
 </Project>
