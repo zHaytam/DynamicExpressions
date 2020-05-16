@@ -18,7 +18,7 @@ namespace DynamicExpressions
 
         public DynamicFilterBuilder<TEntity> And(string property, FilterOperator op, object value)
         {
-            var newExpr = DynamicExpressions.GetPredicate(_param, property, op, value);
+            var newExpr = DynamicExpressions.GetFilter(_param, property, op, value);
             Expression = Expression == null ? newExpr : Expression.AndAlso(Expression, newExpr);
             return this;
         }
@@ -37,7 +37,7 @@ namespace DynamicExpressions
 
         public DynamicFilterBuilder<TEntity> Or(string property, FilterOperator op, object value)
         {
-            var newExpr = DynamicExpressions.GetPredicate(_param, property, op, value);
+            var newExpr = DynamicExpressions.GetFilter(_param, property, op, value);
             Expression = Expression == null ? newExpr : Expression.OrElse(Expression, newExpr);
             return this;
         }

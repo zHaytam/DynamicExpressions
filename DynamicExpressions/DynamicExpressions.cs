@@ -9,11 +9,17 @@ namespace DynamicExpressions
         private static readonly MethodInfo _containsMethod = typeof(string).GetMethod("Contains"
             , new Type[] { typeof(string) });
 
-        private static readonly MethodInfo _startsWithMethod
-            = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
-
         private static readonly MethodInfo _endsWithMethod
             = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+
+        private static readonly MethodInfo _startsWithMethod
+                    = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
+
+        public static Expression<Func<TEntity, bool>> GetPredicate<TEntity>(string property, FilterOperator op, object value)
+        {
+            var param = Expression.Parameter(typeof(TEntity));
+            return Expression.Lambda<Func<TEntity, bool>>(GetFilter(param, property, op, value), param);
+        }
 
         public static Expression<Func<TEntity, object>> GetPropertyGetter<TEntity>(string property)
         {
@@ -26,23 +32,7 @@ namespace DynamicExpressions
             return Expression.Lambda<Func<TEntity, object>>(convertedProp, param);
         }
 
-        public static Func<TEntity, object> GetCompiledPropertyGetter<TEntity>(string property)
-        {
-            return GetPropertyGetter<TEntity>(property).Compile();
-        }
-
-        public static Expression<Func<TEntity, bool>> GetPredicate<TEntity>(string property, FilterOperator op, object value)
-        {
-            var param = Expression.Parameter(typeof(TEntity));
-            return Expression.Lambda<Func<TEntity, bool>>(GetPredicate(param, property, op, value), param);
-        }
-
-        public static Func<TEntity, bool> GetCompiledPredicate<TEntity>(string property, FilterOperator op, object value)
-        {
-            return GetPredicate<TEntity>(property, op, value).Compile();
-        }
-
-        internal static Expression GetPredicate(ParameterExpression param, string property, FilterOperator op, object value)
+        internal static Expression GetFilter(ParameterExpression param, string property, FilterOperator op, object value)
         {
             var constant = Expression.Constant(value);
             var prop = param.GetNestedProperty(property);
