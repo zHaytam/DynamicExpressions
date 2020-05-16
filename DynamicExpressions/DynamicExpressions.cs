@@ -6,6 +6,10 @@ namespace DynamicExpressions
 {
     public static class DynamicExpressions
     {
+        private static readonly Type _stringType = typeof(string);
+
+        private static readonly MethodInfo _toStringMethod = typeof(object).GetMethod("ToString");
+
         private static readonly MethodInfo _containsMethod = typeof(string).GetMethod("Contains"
             , new Type[] { typeof(string) });
 
@@ -46,14 +50,23 @@ namespace DynamicExpressions
                 FilterOperator.Equals => Expression.Equal(prop, constant),
                 FilterOperator.GreaterThan => Expression.GreaterThan(prop, constant),
                 FilterOperator.LessThan => Expression.LessThan(prop, constant),
-                FilterOperator.Contains => Expression.Call(prop, _containsMethod, constant),
-                FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, constant),
-                FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, constant),
+                FilterOperator.Contains => Expression.Call(prop, _containsMethod, PrepareConstant(constant)),
+                FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, PrepareConstant(constant)),
+                FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, PrepareConstant(constant)),
                 FilterOperator.DoesntEqual => Expression.NotEqual(prop, constant),
                 FilterOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(prop, constant),
                 FilterOperator.LessThanOrEqual => Expression.LessThanOrEqual(prop, constant),
-                _ => throw new NotImplementedException(),
+                _ => throw new NotImplementedException()
             };
+        }
+
+        private static Expression PrepareConstant(ConstantExpression constant)
+        {
+            if (constant.Type == _stringType)
+                return constant;
+
+            var convertedExpr = Expression.Convert(constant, typeof(object));
+            return Expression.Call(convertedExpr, _toStringMethod);
         }
     }
 }
