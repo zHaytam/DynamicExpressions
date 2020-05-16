@@ -5,7 +5,7 @@ namespace DynamicExpressions
     public static class ExpressionExtensions
     {
 
-        public static MemberExpression GetNestedProperty(this Expression param, string property)
+        internal static MemberExpression GetNestedProperty(this Expression param, string property)
         {
             var propNames = property.Split('.');
             var propExpr = Expression.Property(param, propNames[0]);

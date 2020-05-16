@@ -21,7 +21,7 @@ namespace DynamicExpressions.UnitTests
         [Fact]
         public void GetPropertyGetter_ShouldReturnCorrectGetter()
         {
-            var entry = new Entry { Id = 2 };
+            var entry = new Entry(2);
 
             var getter = DynamicExpressions.GetPropertyGetter<Entry>("Id").Compile();
             var id = getter(entry);
@@ -34,8 +34,8 @@ namespace DynamicExpressions.UnitTests
         {
             var entries = new List<Entry>
             {
-                new Entry { Id = 1 },
-                new Entry { Id = 2 },
+                new Entry(1),
+                new Entry(2),
             };
 
             var getter = DynamicExpressions.GetPropertyGetter<Entry>("Id");
@@ -48,16 +48,22 @@ namespace DynamicExpressions.UnitTests
         [Fact]
         public void GetPropertyGetter_ShouldThrow_WhenPropertyDoesntExist()
         {
-            var entry = new Entry { Id = 2 };
+            var entry = new Entry(2);
 
             var ex = Assert.Throws<ArgumentException>(() => DynamicExpressions.GetPropertyGetter<Entry>("Test"));
 
             Assert.Equal("Instance property 'Test' is not defined for type 'DynamicExpressions.UnitTests.Entry' (Parameter 'propertyName')", ex.Message);
         }
-    }
 
-    internal class Entry
-    {
-        public int Id { get; set; }
+        [Fact]
+        public void GetPropertyGetter_ShouldHandleNestedProperty()
+        {
+            var entry = new Entry(1, new SubEntry("Title"));
+
+            var getter = DynamicExpressions.GetPropertyGetter<Entry>("SubEntry.Title").Compile();
+            var value = getter(entry);
+
+            Assert.Equal(entry.SubEntry.Title, value);
+        }
     }
 }
