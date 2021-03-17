@@ -9,6 +9,7 @@
         LessThan,
         LessThanOrEqual,
         Contains,
+        NotContains,
         StartsWith,
         EndsWith
     }
