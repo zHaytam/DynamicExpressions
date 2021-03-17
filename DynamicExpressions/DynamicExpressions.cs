@@ -18,8 +18,14 @@ namespace DynamicExpressions
             , new Type[] { typeof(string) });
         private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods().Where(x => string.Equals(x.Name, "Contains", StringComparison.OrdinalIgnoreCase)).Single(x => x.GetParameters().Length == 2).MakeGenericMethod(typeof(string));
 
+        private static readonly MethodInfo _dictionaryContainsKeyMethod = typeof(Dictionary<string, string>).GetMethods().Where(x => string.Equals(x.Name, "ContainsKey", StringComparison.OrdinalIgnoreCase)).Single();
+        private static readonly MethodInfo _dictionaryContainsValueMethod = typeof(Dictionary<string, string>).GetMethods().Where(x => string.Equals(x.Name, "ContainsValue", StringComparison.OrdinalIgnoreCase)).Single();
+
         private static readonly MethodInfo _endsWithMethod
             = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
+
+        private static readonly MethodInfo _isNullOrEmtpyMethod
+        = typeof(string).GetMethod("IsNullOrEmpty", new Type[] { typeof(string) });
 
         private static readonly MethodInfo _startsWithMethod
                     = typeof(string).GetMethod("StartsWith", new Type[] { typeof(string) });
@@ -57,29 +63,38 @@ namespace DynamicExpressions
                 FilterOperator.LessThan => Expression.LessThan(prop, constant),
                 FilterOperator.Contains => GetContainsMethodCallExpression(prop, op, constant),
                 FilterOperator.NotContains => Expression.Not(GetContainsMethodCallExpression(prop, op, constant)),
+                FilterOperator.ContainsKey => Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant)),
+                FilterOperator.NotContainsKey => Expression.Not(Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant))),
+                FilterOperator.ContainsValue => Expression.Call(prop, _dictionaryContainsValueMethod, PrepareConstant(constant)),
+                FilterOperator.NotContainsValue => Expression.Not(Expression.Call(prop, _dictionaryContainsValueMethod, PrepareConstant(constant))),
                 FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, PrepareConstant(constant)),
                 FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, PrepareConstant(constant)),
                 FilterOperator.DoesntEqual => Expression.NotEqual(prop, constant),
                 FilterOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(prop, constant),
                 FilterOperator.LessThanOrEqual => Expression.LessThanOrEqual(prop, constant),
+                FilterOperator.IsEmpty => Expression.Call(_isNullOrEmtpyMethod, prop),
+                FilterOperator.IsNotEmpty => Expression.Not(Expression.Call(_isNullOrEmtpyMethod, prop)),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private static MethodCallExpression GetContainsMethodCallExpression(MemberExpression prop, FilterOperator filterOperator, ConstantExpression constant)
+        private static Expression GetContainsMethodCallExpression(MemberExpression prop, FilterOperator filterOperator, ConstantExpression constant)
         {
             if (prop.Type == _stringType)
                 return Expression.Call(prop, _stringContainsMethod, PrepareConstant(constant));
-            else return Expression.Call(_enumerableContainsMethod, prop, PrepareConstant(constant));
+            else if (prop.Type.GetInterfaces().Contains(typeof(IDictionary)))
+                return Expression.Or(Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant)), Expression.Call(prop, _dictionaryContainsValueMethod, PrepareConstant(constant)));
+            else if (prop.Type.GetInterfaces().Contains(typeof(IEnumerable)))
+                return Expression.Call(_enumerableContainsMethod, prop, PrepareConstant(constant));
+
+            throw new NotImplementedException($"{prop.Type} contains is not implemented.");
+
+
         }
 
         private static Expression PrepareConstant(ConstantExpression constant)
         {
             if (constant.Type == _stringType)
-                return constant;
-            else if (constant.GetType().GetInterfaces().Any(
-            i => i.IsGenericType &&
-            i.GetGenericTypeDefinition() == typeof(IEnumerable<>)))
                 return constant;
 
             var convertedExpr = Expression.Convert(constant, typeof(object));

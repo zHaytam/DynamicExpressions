@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Xunit;
+using Xunit.Extensions;
 
 namespace DynamicExpressions.UnitTests
 {
@@ -35,13 +36,54 @@ namespace DynamicExpressions.UnitTests
         }
 
         [Theory]
-        [InlineData(3, new string[1] { "Title 3" }, FilterOperator.Contains, "Title 3")]
-        [InlineData(3, new string[1] { "Title 3" }, FilterOperator.NotContains, "Title 5")]
-        public void GetPredicate_ShouldHandleEnumerableStringOperators(int id, string[] title, FilterOperator op, object value)
+        [InlineData(3, "", FilterOperator.IsEmpty, "doesn't matter. ignored")]
+        [InlineData(3, null, FilterOperator.IsEmpty, "")]
+        [InlineData(3, "Title 3", FilterOperator.IsNotEmpty, "")]
+        public void GetPredicate_ShouldHandleNullOrEmtpyStringOperators(int id, string title, FilterOperator op, object value)
         {
-            var entry = new Entry<string[]>(id, new SubEntry<string[]>(title));
-            var predicate = DynamicExpressions.GetPredicate<Entry<string[]>>("SubEntry.Title", op, value).Compile();
+            var entry = new Entry<string>(id, new SubEntry<string>(title));
+            var predicate = DynamicExpressions.GetPredicate<Entry<string>>("SubEntry.Title", op, value).Compile();
             Assert.True(predicate(entry));
+        }
+
+        [Theory]
+        [InlineData(3, "I'm not empty", FilterOperator.IsEmpty, "doesn't matter. ignored")]
+        [InlineData(3, "Neither am i", FilterOperator.IsEmpty, "")]
+        [InlineData(3, "", FilterOperator.IsNotEmpty, "")]
+        [InlineData(3, null, FilterOperator.IsNotEmpty, "")]
+        public void GetPredicate_ShouldHandleNullOrEmtpyStringOperatorsFalse(int id, string title, FilterOperator op, object value)
+        {
+            var entry = new Entry<string>(id, new SubEntry<string>(title));
+            var predicate = DynamicExpressions.GetPredicate<Entry<string>>("SubEntry.Title", op, value).Compile();
+            Assert.False(predicate(entry));
+        }
+
+        [Theory]
+        [MemberData(nameof(ListTestData))]
+        public void GetPredicate_ShouldHandleEnumerableStringOperators<T>(int id, T title, FilterOperator op, object value)
+        {
+            var entry = new Entry<T>(id, new SubEntry<T>(title));
+            var predicate = DynamicExpressions.GetPredicate<Entry<T>>("SubEntry.Title", op, value).Compile();
+            Assert.True(predicate(entry));
+        }
+
+        public static IEnumerable<object[]> ListTestData
+        {
+            get
+            {
+                return new[]{
+                    new object[]{3, new List<string>() { "Title 3" }, FilterOperator.Contains, "Title 3" },
+                    new object[]{3, new List<string>() { "Title 3" }, FilterOperator.NotContains, "Title 5" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.Contains, "Key 3" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.Contains, "Value 1" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.NotContains, "Key 5" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.NotContains, "Value 5" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.ContainsKey, "Key 3" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.ContainsValue, "Value 1" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.NotContainsKey, "Key 5" },
+                    new object[]{3, new Dictionary<string, string> { { "Key 3", "Value 1" } }, FilterOperator.NotContainsValue, "Value 5" }
+                };
+            }
         }
 
         [Theory]

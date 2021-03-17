@@ -11,6 +11,12 @@
         Contains,
         NotContains,
         StartsWith,
-        EndsWith
+        EndsWith,
+        IsEmpty,
+        IsNotEmpty,
+        ContainsKey,
+        NotContainsKey,
+        ContainsValue,
+        NotContainsValue
     }
 }
