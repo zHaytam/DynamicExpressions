@@ -24,6 +24,21 @@ namespace DynamicExpressions.UnitTests
         }
 
         [Theory]
+        [InlineData(1, true, "SubEntry.Title", FilterOperator.Equals, true)]
+        [InlineData(1, true, "SubEntry.Title", FilterOperator.Equals, "true")]
+        [InlineData(1, true, "SubEntry.Title", FilterOperator.Equals, "True")]
+        [InlineData(1, false, "SubEntry.Title", FilterOperator.Equals, "False")]
+        [InlineData(1, false, "SubEntry.Title", FilterOperator.Equals, "false")]
+        [InlineData(1, false, "SubEntry.Title", FilterOperator.Equals, false)]
+        public void GetPredicate_ShouldHandleEqualsGenericOperators<T>(int id, T title,
+            string property, FilterOperator op, object value)
+        {
+            var entry = new Entry<T>(id, new SubEntry<T>(title));
+            var predicate = DynamicExpressions.GetPredicate<Entry<T>>(property, op, value).Compile();
+            Assert.True(predicate(entry));
+        }
+
+        [Theory]
         [InlineData(3, "Title 3", FilterOperator.Contains, "3")]
         [InlineData(3, "Title 3", FilterOperator.NotContains, "5")]
         [InlineData(4, "Title 4", FilterOperator.StartsWith, "Title")]

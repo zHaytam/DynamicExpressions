@@ -58,18 +58,18 @@ namespace DynamicExpressions
         {
             return op switch
             {
-                FilterOperator.Equals => Expression.Equal(prop, constant),
+                FilterOperator.Equals => RobustEquals(prop, constant),
                 FilterOperator.GreaterThan => Expression.GreaterThan(prop, constant),
                 FilterOperator.LessThan => Expression.LessThan(prop, constant),
-                FilterOperator.Contains => GetContainsMethodCallExpression(prop, op, constant),
-                FilterOperator.NotContains => Expression.Not(GetContainsMethodCallExpression(prop, op, constant)),
+                FilterOperator.Contains => GetContainsMethodCallExpression(prop, constant),
+                FilterOperator.NotContains => Expression.Not(GetContainsMethodCallExpression(prop, constant)),
                 FilterOperator.ContainsKey => Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant)),
                 FilterOperator.NotContainsKey => Expression.Not(Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant))),
                 FilterOperator.ContainsValue => Expression.Call(prop, _dictionaryContainsValueMethod, PrepareConstant(constant)),
                 FilterOperator.NotContainsValue => Expression.Not(Expression.Call(prop, _dictionaryContainsValueMethod, PrepareConstant(constant))),
                 FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, PrepareConstant(constant)),
                 FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, PrepareConstant(constant)),
-                FilterOperator.DoesntEqual => Expression.NotEqual(prop, constant),
+                FilterOperator.DoesntEqual => Expression.Not(RobustEquals(prop, constant)),
                 FilterOperator.GreaterThanOrEqual => Expression.GreaterThanOrEqual(prop, constant),
                 FilterOperator.LessThanOrEqual => Expression.LessThanOrEqual(prop, constant),
                 FilterOperator.IsEmpty => Expression.Call(_isNullOrEmtpyMethod, prop),
@@ -78,7 +78,16 @@ namespace DynamicExpressions
             };
         }
 
-        private static Expression GetContainsMethodCallExpression(MemberExpression prop, FilterOperator filterOperator, ConstantExpression constant)
+        private static Expression RobustEquals(MemberExpression prop, ConstantExpression constant)
+        {
+            if (prop.Type == typeof(bool) && bool.TryParse(constant.Value.ToString(), out var val))
+            {
+                return Expression.Equal(prop, Expression.Constant(val));
+            }
+            return Expression.Equal(prop, constant);
+        }
+
+        private static Expression GetContainsMethodCallExpression(MemberExpression prop, ConstantExpression constant)
         {
             if (prop.Type == _stringType)
                 return Expression.Call(prop, _stringContainsMethod, PrepareConstant(constant));
@@ -94,6 +103,7 @@ namespace DynamicExpressions
 
         private static Expression PrepareConstant(ConstantExpression constant)
         {
+
             if (constant.Type == _stringType)
                 return constant;
 
