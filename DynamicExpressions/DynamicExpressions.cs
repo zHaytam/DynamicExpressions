@@ -12,6 +12,8 @@ namespace DynamicExpressions
 
         private static readonly MethodInfo _containsMethod = typeof(string).GetMethod("Contains"
             , new Type[] { typeof(string) });
+        private static readonly MethodInfo _containsMethodIgnoreCase = typeof(string).GetMethod("Contains"
+            , new Type[] { typeof(string), typeof(StringComparison) });
 
         private static readonly MethodInfo _endsWithMethod
             = typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) });
@@ -51,6 +53,7 @@ namespace DynamicExpressions
                 FilterOperator.GreaterThan => Expression.GreaterThan(prop, constant),
                 FilterOperator.LessThan => Expression.LessThan(prop, constant),
                 FilterOperator.Contains => Expression.Call(prop, _containsMethod, PrepareConstant(constant)),
+                FilterOperator.ContainsIgnoreCase => Expression.Call(prop, _containsMethodIgnoreCase, PrepareConstant(constant), Expression.Constant(StringComparison.OrdinalIgnoreCase)),
                 FilterOperator.StartsWith => Expression.Call(prop, _startsWithMethod, PrepareConstant(constant)),
                 FilterOperator.EndsWith => Expression.Call(prop, _endsWithMethod, PrepareConstant(constant)),
                 FilterOperator.DoesntEqual => Expression.NotEqual(prop, constant),
