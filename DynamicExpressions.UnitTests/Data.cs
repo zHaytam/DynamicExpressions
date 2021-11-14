@@ -1,24 +1,24 @@
 ﻿namespace DynamicExpressions.UnitTests
 {
-    internal class Entry
+    internal class Entry<T>
     {
-        public Entry(int id, SubEntry subEntry = null)
+        public Entry(int id, SubEntry<T> subEntry = null)
         {
             Id = id;
             SubEntry = subEntry;
         }
 
         public int Id { get; }
-        public SubEntry SubEntry { get; }
+        public SubEntry<T> SubEntry { get; }
     }
 
-    internal class SubEntry
+    internal class SubEntry<T>
     {
-        public SubEntry(string title)
+        public SubEntry(T title)
         {
             Title = title;
         }
 
-        public string Title { get; }
+        public T Title { get; }
     }
 }

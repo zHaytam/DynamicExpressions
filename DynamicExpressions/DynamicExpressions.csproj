@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>DynamicExpressions</AssemblyName>
-    <RootNamespace>DynamicExpressions</RootNamespace>
+    <RootNamespace>DynamicExpressions</RootNamespace>   
+    
   </PropertyGroup>
+
+  <Import Project="Nuget.csproj" Condition="Exists('Nuget.csproj')"></Import> 
 
 </Project>
