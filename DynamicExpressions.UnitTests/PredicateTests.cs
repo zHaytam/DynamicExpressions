@@ -43,6 +43,7 @@ namespace DynamicExpressions.UnitTests
         [InlineData(3, "Title 3", FilterOperator.NotContains, "5")]
         [InlineData(4, "Title 4", FilterOperator.StartsWith, "Title")]
         [InlineData(5, "Title 5", FilterOperator.EndsWith, "5")]
+        [InlineData(5, "Title 6", FilterOperator.ContainsIgnoreCase, "title")]
         public void GetPredicate_ShouldHandleNestedStringOperators(int id, string title, FilterOperator op, object value)
         {
             var entry = new Entry<string>(id, new SubEntry<string>(title));
