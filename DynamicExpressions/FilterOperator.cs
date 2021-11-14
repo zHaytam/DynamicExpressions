@@ -9,8 +9,15 @@
         LessThan,
         LessThanOrEqual,
         Contains,
+        NotContains,
         StartsWith,
         EndsWith,
-        ContainsIgnoreCase
+        ContainsIgnoreCase,
+        IsEmpty,
+        IsNotEmpty,
+        ContainsKey,
+        NotContainsKey,
+        ContainsValue,
+        NotContainsValue
     }
 }
