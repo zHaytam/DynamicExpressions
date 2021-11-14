@@ -12,6 +12,7 @@
         NotContains,
         StartsWith,
         EndsWith,
+        ContainsIgnoreCase,
         IsEmpty,
         IsNotEmpty,
         ContainsKey,

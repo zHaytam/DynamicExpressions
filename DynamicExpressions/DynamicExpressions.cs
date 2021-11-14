@@ -16,8 +16,9 @@ namespace DynamicExpressions
 
         private static readonly MethodInfo _stringContainsMethod = typeof(string).GetMethod("Contains"
             , new Type[] { typeof(string) });
+        private static readonly MethodInfo _stringContainsMethodIgnoreCase = typeof(string).GetMethod("Contains"
+            , new Type[] { typeof(string), typeof(StringComparison) });
         private static readonly MethodInfo _enumerableContainsMethod = typeof(Enumerable).GetMethods().Where(x => string.Equals(x.Name, "Contains", StringComparison.OrdinalIgnoreCase)).Single(x => x.GetParameters().Length == 2).MakeGenericMethod(typeof(string));
-
         private static readonly MethodInfo _dictionaryContainsKeyMethod = typeof(Dictionary<string, string>).GetMethods().Where(x => string.Equals(x.Name, "ContainsKey", StringComparison.OrdinalIgnoreCase)).Single();
         private static readonly MethodInfo _dictionaryContainsValueMethod = typeof(Dictionary<string, string>).GetMethods().Where(x => string.Equals(x.Name, "ContainsValue", StringComparison.OrdinalIgnoreCase)).Single();
 
@@ -61,6 +62,7 @@ namespace DynamicExpressions
                 FilterOperator.Equals => RobustEquals(prop, constant),
                 FilterOperator.GreaterThan => Expression.GreaterThan(prop, constant),
                 FilterOperator.LessThan => Expression.LessThan(prop, constant),
+                FilterOperator.ContainsIgnoreCase => Expression.Call(prop, _stringContainsMethodIgnoreCase, PrepareConstant(constant), Expression.Constant(StringComparison.OrdinalIgnoreCase)),
                 FilterOperator.Contains => GetContainsMethodCallExpression(prop, constant),
                 FilterOperator.NotContains => Expression.Not(GetContainsMethodCallExpression(prop, constant)),
                 FilterOperator.ContainsKey => Expression.Call(prop, _dictionaryContainsKeyMethod, PrepareConstant(constant)),
