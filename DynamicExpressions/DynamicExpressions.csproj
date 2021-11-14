@@ -3,8 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>DynamicExpressions</AssemblyName>
-    <RootNamespace>DynamicExpressions</RootNamespace>   
-    
+    <RootNamespace>DynamicExpressions</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>zHaytam</Authors>
+    <Company>zHaytam</Company>
+    <Product>DynamicExpressions.NET</Product>
+    <PackageId>DynamicExpressions.NET</PackageId>
+    <RepositoryUrl>https://github.com/zHaytam/DynamicExpressions</RepositoryUrl>
+    <Description>A dynamic expression builder that can be used to dynamically sort and/or filter LINQ/EF queries</Description>
   </PropertyGroup>
 
   <Import Project="Nuget.csproj" Condition="Exists('Nuget.csproj')"></Import> 
